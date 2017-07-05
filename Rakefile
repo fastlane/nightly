@@ -1,3 +1,8 @@
+require 'logger'
+$stdout.sync = true
+log_path = ENV['FASTLANE_NIGHTLY_LOG_PATH'] ? File.join(ENV['FASTLANE_NIGHTLY_LOG_PATH'], 'nightly.log') : STDOUT
+logger = Logger.new(log_path)
+
 gem_name = ENV["GEM_NAME"] || (raise "Please provide a gem name using GEM_NAME")
 repo_name = ENV["REPO_NAME"] || gem_name
 git_url = ENV["GIT_URL"] || "https://github.com/#{repo_name}/#{repo_name}"
@@ -5,6 +10,7 @@ version_file_path = ENV["VERSION_FILE_PATH"] || File.join(gem_name, "lib", gem_n
 
 desc "Prepare a new fastlane beta build"
 task :beta do
+  logger.info '*** STARTING NIGHTLY BUILD'
   require 'fastlane'
   require 'shellwords'
 
@@ -22,7 +28,7 @@ task :beta do
     begin
       sh "git clone --depth 1 #{git_url}"
     rescue => ex
-      puts ex
+      logger.error ex
       raise "Couldn't clone git repo, you can provide a custom URL using GIT_URL"
     end
   end
@@ -33,7 +39,7 @@ task :beta do
     Fastlane::Actions::VersionBumpPodspecAction.run({path: version_file_path, version_number: new_version})
 
     sh "rake install"
-    puts "About to deploy #{new_version} to RubyGems"
+    logger.info "About to deploy #{new_version} to RubyGems"
     gem_path = "./pkg/#{gem_name}-#{new_version}.gem"
 
     with_api_key do |gem_config_path|
@@ -50,7 +56,7 @@ task :beta do
       Fastlane::Actions::SlackAction.run(config)
     end
 
-    puts "Successfully deployed #{new_version} to RubyGems"
+    logger.info "Successfully deployed #{new_version} to RubyGems"
   end
 end
 
