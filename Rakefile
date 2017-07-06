@@ -21,11 +21,13 @@ task :beta do
   new_version = previous_version.bump.to_s + ".0.beta.#{beta_number}"
 
   if File.directory?(repo_name)
+    logger.info "Pulling from master: #{repo_name}"
     Dir.chdir(repo_name) do
       sh "git fetch origin && git reset --hard origin/master && git pull"
     end
   else
     begin
+      logger.info "Cloning repo: #{git_url}"
       sh "git clone --depth 1 #{git_url}"
     rescue => ex
       logger.error ex
@@ -47,6 +49,7 @@ task :beta do
     end
 
     if ENV["SLACK_URL"]
+      logger.info "Posting to Slack"
       # Post a message to Slack about the new release
       config = FastlaneCore::Configuration.create(Fastlane::Actions::SlackAction.available_options, {
         message: "Successfully pushed new nightly build `#{new_version}` :rocket:\n\nPlease give it a shot using\n\n`gem update fastlane --pre`\n\nor by adding\n\n`gem 'fastlane', '>= #{new_version}'`\n\nto your Gemfile",
