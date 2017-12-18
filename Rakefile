@@ -40,32 +40,28 @@ task :beta do
     Fastlane::Actions.load_helpers
     Fastlane::Actions::VersionBumpPodspecAction.run({path: version_file_path, version_number: new_version})
 
-    loger.info(sh "gem list fastlane")
-
     sh "rake install"
     logger.info "About to deploy #{new_version} to RubyGems"
     gem_path = "./pkg/#{gem_name}-#{new_version}.gem"
 
-    # with_api_key do |gem_config_path|
-    #   sh "gem push '#{gem_path}' --config-file #{gem_config_path.shellescape}"
-    # end
+    with_api_key do |gem_config_path|
+      sh "gem push '#{gem_path}' --config-file #{gem_config_path.shellescape}"
+    end
 
-    # if ENV["SLACK_URL"]
-    #   logger.info "Posting to Slack"
-    #   # Post a message to Slack about the new release
-    #   config = FastlaneCore::Configuration.create(Fastlane::Actions::SlackAction.available_options, {
-    #     message: "Successfully pushed new nightly build `#{new_version}` :rocket:\n\nPlease give it a shot using\n\n`gem update fastlane --pre`\n\nor by adding\n\n`gem 'fastlane', '>= #{new_version}'`\n\nto your Gemfile",
-    #     channel: ENV["SLACK_CHANNEL"] || "releases",
-    #     default_payloads: []
-    #   })
-    #   Fastlane::Actions::SlackAction.run(config)
-    # end
+    if ENV["SLACK_URL"]
+      logger.info "Posting to Slack"
+      # Post a message to Slack about the new release
+      config = FastlaneCore::Configuration.create(Fastlane::Actions::SlackAction.available_options, {
+        message: "Successfully pushed new nightly build `#{new_version}` :rocket:\n\nPlease give it a shot using\n\n`gem update fastlane --pre`\n\nor by adding\n\n`gem 'fastlane', '>= #{new_version}'`\n\nto your Gemfile",
+        channel: ENV["SLACK_CHANNEL"] || "releases",
+        default_payloads: []
+      })
+      Fastlane::Actions::SlackAction.run(config)
+    end
 
     logger.info "Successfully deployed #{new_version} to RubyGems"
   end
-  logger.info "Cleaning up old gems"
-  sh "gem cleanup"
-  loger.info(sh "gem list fastlane")
+  sh "bundle clean"
 end
 
 def with_api_key
