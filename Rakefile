@@ -3,7 +3,7 @@ $stdout.sync = true
 log_path = ENV['FASTLANE_NIGHTLY_LOG_PATH'] ? File.join(ENV['FASTLANE_NIGHTLY_LOG_PATH'], 'nightly.log') : STDOUT
 logger = Logger.new(log_path)
 
-gem_name = ENV["GEM_NAME"] || (raise "Please provide a gem name using GEM_NAME")
+gem_name = "fastlane" # ENV["GEM_NAME"] || (raise "Please provide a gem name using GEM_NAME")
 repo_name = ENV["REPO_NAME"] || gem_name
 git_url = ENV["GIT_URL"] || "https://github.com/#{repo_name}/#{repo_name}"
 version_file_path = ENV["VERSION_FILE_PATH"] || File.join(gem_name, "lib", gem_name, "version.rb")
@@ -44,23 +44,25 @@ task :beta do
     logger.info "About to deploy #{new_version} to RubyGems"
     gem_path = "./pkg/#{gem_name}-#{new_version}.gem"
 
-    with_api_key do |gem_config_path|
-      sh "gem push '#{gem_path}' --config-file #{gem_config_path.shellescape}"
-    end
+    # with_api_key do |gem_config_path|
+    #   sh "gem push '#{gem_path}' --config-file #{gem_config_path.shellescape}"
+    # end
 
-    if ENV["SLACK_URL"]
-      logger.info "Posting to Slack"
-      # Post a message to Slack about the new release
-      config = FastlaneCore::Configuration.create(Fastlane::Actions::SlackAction.available_options, {
-        message: "Successfully pushed new nightly build `#{new_version}` :rocket:\n\nPlease give it a shot using\n\n`gem update fastlane --pre`\n\nor by adding\n\n`gem 'fastlane', '>= #{new_version}'`\n\nto your Gemfile",
-        channel: ENV["SLACK_CHANNEL"] || "releases",
-        default_payloads: []
-      })
-      Fastlane::Actions::SlackAction.run(config)
-    end
+    # if ENV["SLACK_URL"]
+    #   logger.info "Posting to Slack"
+    #   # Post a message to Slack about the new release
+    #   config = FastlaneCore::Configuration.create(Fastlane::Actions::SlackAction.available_options, {
+    #     message: "Successfully pushed new nightly build `#{new_version}` :rocket:\n\nPlease give it a shot using\n\n`gem update fastlane --pre`\n\nor by adding\n\n`gem 'fastlane', '>= #{new_version}'`\n\nto your Gemfile",
+    #     channel: ENV["SLACK_CHANNEL"] || "releases",
+    #     default_payloads: []
+    #   })
+    #   Fastlane::Actions::SlackAction.run(config)
+    # end
 
     logger.info "Successfully deployed #{new_version} to RubyGems"
   end
+
+  sh 'gem cleanup'
 end
 
 def with_api_key
