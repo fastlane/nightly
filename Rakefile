@@ -40,6 +40,8 @@ task :beta do
     Fastlane::Actions.load_helpers
     Fastlane::Actions::VersionBumpPodspecAction.run({path: version_file_path, version_number: new_version})
 
+    loger.info(sh "gem list fastlane")
+
     sh "rake install"
     logger.info "About to deploy #{new_version} to RubyGems"
     gem_path = "./pkg/#{gem_name}-#{new_version}.gem"
@@ -61,6 +63,9 @@ task :beta do
 
     logger.info "Successfully deployed #{new_version} to RubyGems"
   end
+  logger.info "Cleaning up old gems"
+  sh "gem cleanup"
+  loger.info(sh "gem list fastlane")
 end
 
 def with_api_key
