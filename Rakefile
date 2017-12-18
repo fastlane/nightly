@@ -61,6 +61,7 @@ task :beta do
 
     logger.info "Successfully deployed #{new_version} to RubyGems"
   end
+  sh "bundle clean"
 end
 
 def with_api_key
