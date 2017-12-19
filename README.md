@@ -18,3 +18,5 @@ Optional environment variable
 - `SLACK_CHANNEL` (only used in combination with `SLACK_URL`, defaults to `"releases"`)
 
 Put all of that on any server (e.g. Heroku) and use a schedule to call `rake beta` every night.
+
+Please note that the nightly-build system run by the `fastlane` core team does not automatically deploy code changes made to this repository. When merging changes to the repository, please let a member of the `fastlane` core team know (via Slack or at-mention in the GitHub pull request), so that they can manually deploy your code change.
