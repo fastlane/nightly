@@ -43,6 +43,7 @@ task :beta do
     sh "rake install"
     logger.info "About to deploy #{new_version} to RubyGems"
     gem_path = "./pkg/#{gem_name}-#{new_version}.gem"
+    logger.info "Finished building package"
 
     with_api_key do |gem_config_path|
       sh "gem push '#{gem_path}' --config-file #{gem_config_path.shellescape}"
