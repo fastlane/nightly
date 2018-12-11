@@ -163,5 +163,8 @@ DEPENDENCIES
   pry
   rake
 
+RUBY VERSION
+   ruby 2.4.0p0
+
 BUNDLED WITH
    1.16.2
